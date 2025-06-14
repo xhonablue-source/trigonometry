@@ -45,31 +45,3 @@ st.plotly_chart(fig)
 # --- SECTION 3: SIN(X)/X LIMIT ---
 st.subheader("📉 Explore: Why sin(x)/x only works with Radians")
 st.latex(r"\lim_{x \to 0} \frac{\sin x}{x} = 1")
-
-x_vals = np.linspace(-1, 1, 400)
-sin_x_over_x_rad = np.sinc(x_vals / np.pi)
-sin_x_over_x_deg = np.sin(np.deg2rad(x_vals)) / x_vals
-
-fig2 = go.Figure()
-fig2.add_trace(go.Scatter(x=x_vals, y=sin_x_over_x_rad, name="sin(x)/x in Radians"))
-fig2.add_trace(go.Scatter(x=x_vals, y=sin_x_over_x_deg, name="sin(x)/x in Degrees", line=dict(dash="dash")))
-fig2.update_layout(title="Behavior of sin(x)/x near 0", xaxis_title="x", yaxis_title="sin(x)/x", legend_title="Angle Type")
-st.plotly_chart(fig2)
-
-# --- SECTION 4: CLASSROOM TAKEAWAYS ---
-st.subheader("📝 Teaching Implications")
-st.markdown("""
-- **Degrees** are more familiar and used in everyday applications.
-- **Radians** are mathematically coherent with functions, limits, and derivatives.
-- Students should **start with degrees** for measurement, but be **introduced to radians** in Algebra II to prepare for Precalculus and Calculus.
-
-✔ Radians are not harder—they're **just more natural** when we connect circular motion and algebra.
-""")
-
-# --- FOOTER ---
-st.markdown("""
----
-<div style='text-align: center;'>
-    <p style='font-size: 0.85rem;'>Built with ❤️ for 9th grade math learners | MathCraft | <strong>Xavier Honablue, M.Ed</strong></p>
-</div>
-""", unsafe_allow_html=True)
