@@ -1,4 +1,174 @@
-import streamlit as st
+st.header("📊 Sine & Cosine: From Definitions to Functions")
+    
+    st.markdown("""
+    ### 🌊 From Points to Waves: The Function Story
+    Now that you know sine and cosine are **ratios** and **coordinates**, let's see what happens when we **connect all the dots**!
+    
+    **The big idea**: As the angle changes continuously, sine and cosine create beautiful wave patterns!
+    """)
+    
+    # Show the connection from circle to function
+    st.subheader("🎬 Watch the Magic Happen: Circle → Wave")
+    
+    demo_choice = st.radio("Choose your demo:", 
+                          ["🎭 Interactive: Move the angle yourself", "🎬 Animation: Watch it unfold", "📊 Both views side-by-side"])
+    
+    if demo_choice == "🎭 Interactive: Move the angle yourself":
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
+        with col1:
+            angle_demo = st.slider("Move the angle:", 0, 720, 0, 15, key="demo_angle")
+            angle_rad_demo = math.radians(angle_demo)
+            
+            st.markdown(f"""
+            #### 📊 Current State:
+            - **Angle**: {angle_demo}°
+            - **x-coordinate**: {math.cos(angle_rad_demo):.3f}
+            - **y-coordinate**: {math.sin(angle_rad_demo):.3f}
+            - **cos({angle_demo}°)** = {math.cos(angle_rad_demo):.3f}
+            - **sin({angle_demo}°)** = {math.sin(angle_rad_demo):.3f}
+            """)
+        
+        with col2:
+            # Unit circle view
+            fig_circle_demo = go.Figure()
+            
+            # Circle
+            theta_vals = np.linspace(0, 2*math.pi, 100)
+            circle_x_vals = np.cos(theta_vals)
+            circle_y_vals = np.sin(theta_vals)
+            fig_circle_demo.add_trace(go.Scatter(x=circle_x_vals, y=circle_y_vals, mode='lines',
+                                               line=dict(color='lightblue', width=3), name='Unit Circle'))
+            
+            # Current point
+            current_x = math.cos(angle_rad_demo)
+            current_y = math.sin(angle_rad_demo)
+            fig_circle_demo.add_trace(go.Scatter(x=[current_x], y=[current_y], mode='markers',
+                                               marker=dict(size=15, color='red'), name='Current Point'))
+            
+            # Line from center
+            fig_circle_demo.add_trace(go.Scatter(x=[0, current_x], y=[0, current_y], mode='lines',
+                                               line=dict(color='red', width=3)))
+            
+            # Coordinate lines
+            fig_circle_demo.add_trace(go.Scatter(x=[current_x, current_x], y=[0, current_y], mode='lines',
+                                               line=dict(color='green', width=2, dash='dash')))
+            fig_circle_demo.add_trace(go.Scatter(x=[0, current_x], y=[current_y, current_y], mode='lines',
+                                               line=dict(color='blue', width=2, dash='dash')))
+            
+            fig_circle_demo.update_layout(title="Unit Circle", xaxis=dict(scaleanchor="y", scaleratio=1, range=[-1.2, 1.2]),
+                                        yaxis=dict(range=[-1.2, 1.2]), height=300, showlegend=False)
+            
+            st.plotly_chart(fig_circle_demo, use_container_width=True)
+        
+        with col3:
+            # Function values up to current angle
+            angles_so_far = np.linspace(0, math.radians(angle_demo), max(angle_demo//5, 1))
+            angles_degrees = np.degrees(angles_so_far)
+            cos_values = np.cos(angles_so_far)
+            sin_values = np.sin(angles_so_far)
+            
+            fig_function_demo = go.Figure()
+            fig_function_demo.add_trace(go.Scatter(x=angles_degrees, y=cos_values, mode='lines+markers',
+                                                 line=dict(color='blue', width=3), name='cosine'))
+            fig_function_demo.add_trace(go.Scatter(x=angles_degrees, y=sin_values, mode='lines+markers',
+                                                 line=dict(color='red', width=3), name='sine'))
+            
+            # Current point on functions
+            fig_function_demo.add_trace(go.Scatter(x=[angle_demo], y=[math.cos(angle_rad_demo)], mode='markers',
+                                                 marker=dict(size=12, color='blue'), showlegend=False))
+            fig_function_demo.add_trace(go.Scatter(x=[angle_demo], y=[math.sin(angle_rad_demo)], mode='markers',
+                                                 marker=dict(size=12, color='red'), showlegend=False))
+            
+            fig_function_demo.update_layout(title="Building the Functions", xaxis_title="Angle (degrees)",
+                                          yaxis_title="Function Value", height=300, yaxis=dict(range=[-1.2, 1.2]))
+            
+            st.plotly_chart(fig_function_demo, use_container_width=True)
+    
+    elif demo_choice == "🎬 Animation: Watch it unfold":
+        if st.button("▶️ Start Animation"):
+            placeholder_circle = st.empty()
+            placeholder_function = st.empty()
+            
+            angles_animated = []
+            cos_animated = []
+            sin_animated = []
+            
+            for angle_deg in range(0, 361, 10):
+                angle_rad = math.radians(angle_deg)
+                angles_animated.append(angle_deg)
+                cos_animated.append(math.cos(angle_rad))
+                sin_animated.append(math.sin(angle_rad))
+                
+                # Circle plot
+                fig_anim_circle = go.Figure()
+                theta_circle = np.linspace(0, 2*math.pi, 100)
+                fig_anim_circle.add_trace(go.Scatter(x=np.cos(theta_circle), y=np.sin(theta_circle),
+                                                   mode='lines', line=dict(color='lightblue', width=3)))
+                fig_anim_circle.add_trace(go.Scatter(x=[math.cos(angle_rad)], y=[math.sin(angle_rad)],
+                                                   mode='markers', marker=dict(size=15, color='red')))
+                fig_anim_circle.add_trace(go.Scatter(x=[0, math.cos(angle_rad)], y=[0, math.sin(angle_rad)],
+                                                   mode='lines', line=dict(color='red', width=3)))
+                fig_anim_circle.update_layout(title=f"Angle: {angle_deg}°", xaxis=dict(scaleanchor="y", range=[-1.2, 1.2]),
+                                            yaxis=dict(range=[-1.2, 1.2]), height=250, showlegend=False)
+                
+                # Function plot  
+                fig_anim_func = go.Figure()
+                fig_anim_func.add_trace(go.Scatter(x=angles_animated, y=cos_animated, mode='lines',
+                                                 line=dict(color='blue', width=3), name='cosine'))
+                fig_anim_func.add_trace(go.Scatter(x=angles_animated, y=sin_animated, mode='lines',
+                                                 line=dict(color='red', width=3), name='sine'))
+                fig_anim_func.update_layout(title="Functions Being Created", xaxis_title="Angle (degrees)",
+                                          yaxis_title="Value", height=250, yaxis=dict(range=[-1.2, 1.2]))
+                
+                placeholder_circle.plotly_chart(fig_anim_circle, use_container_width=True)
+                placeholder_function.plotly_chart(fig_anim_func, use_container_width=True)
+    
+    else:  # Both views side-by-side
+        st.markdown("#### 📊 Complete Picture: Circle and Functions Together")
+        
+        range_choice = st.selectbox("Choose angle range to display:", 
+                                   ["One full rotation (0° to 360°)", "Two rotations (0° to 720°)", "Custom range"])
+        
+        if range_choice == "Custom range":
+            max_angle = st.slider("Maximum angle to show:", 180, 1440, 360, 90)
+        elif range_choice == "Two rotations (0° to 720°)":
+            max_angle = 720
+        else:
+            max_angle = 360
+        
+        # Generate complete function data
+        angles_complete = np.linspace(0, max_angle, max_angle//2)
+        angles_rad_complete = np.radians(angles_complete)
+        cos_complete = np.cos(angles_rad_complete)
+        sin_complete = np.sin(angles_rad_complete)
+        
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            # Unit circle (showing current position)
+            current_angle = st.slider("Current angle:", 0, max_angle, 0, 15, key="current_pos")
+            current_rad = math.radians(current_angle)
+            
+            fig_both_circle = go.Figure()
+            
+            # Circle
+            theta_both = np.linspace(0, 2*math.pi, 100)
+            fig_both_circle.add_trace(go.Scatter(x=np.cos(theta_both), y=np.sin(theta_both), mode='lines',
+                                               line=dict(color='lightblue', width=3), name='Unit Circle'))
+            
+            # Current position
+            curr_x = math.cos(current_rad)
+            curr_y = math.sin(current_rad)
+            fig_both_circle.add_trace(go.Scatter(x=[curr_x], y=[curr_y], mode='markers',
+                                               marker=dict(size=15, color='red'), name='Current'))
+            fig_both_circle.add_trace(go.Scatter(x=[0, curr_x], y=[0, curr_y], mode='lines',
+                                               line=dict(color='red', width=3)))
+            
+            # Trail showing path
+            if current_angle > 0:
+                trail_angles = np.linspace(0, current_rad, max(current_angle//10, 1))
+                trail_x = np.import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
@@ -10,11 +180,11 @@ st.set_page_config(page_title="MathCraft: Complete Trigonometry Journey", layout
 
 # --- SIDEBAR NAVIGATION ---
 st.sidebar.markdown("# 📚 Lesson Navigation")
-lesson_choice = st.sidebar.selectbox(
+    lesson_choice = st.sidebar.selectbox(
     "Choose your lesson:",
-    ["🏠 Home & History", "📐 Angles: Degrees vs Radians", "🌀 Unit Circle Explorer", 
-     "📊 Sine & Cosine Functions", "🔢 The Famous Limit", "🎯 Practice Problems", 
-     "🌍 Real-World Applications", "🧮 Quick Reference Guide"]
+    ["🏠 Home & History", "📐 Angles: Degrees vs Radians", "📏 What ARE Sine & Cosine?", 
+     "🌀 Unit Circle Explorer", "📊 Sine & Cosine as Functions", "🔢 The Famous Limit", 
+     "🎯 Practice Problems", "🌍 Real-World Applications", "🧮 Quick Reference Guide"]
 )
 
 # --- HEADER ---
@@ -134,7 +304,345 @@ elif lesson_choice == "📐 Angles: Degrees vs Radians":
     }
     st.table(angle_df)
 
-# --- LESSON 3: UNIT CIRCLE ---
+# --- LESSON 3: WHAT ARE SINE & COSINE? ---
+elif lesson_choice == "📏 What ARE Sine & Cosine?":
+    st.header("📏 What ARE Sine and Cosine? (The Definitions)")
+    
+    st.markdown("""
+    ### 🤔 Before we get to fancy functions...
+    **Let's answer the most important question: WHAT exactly are sine and cosine?**
+    
+    Sine and cosine are NOT mysterious magic—they're just **ratios** and **coordinates**!
+    """)
+    
+    # Definition approach selector
+    definition_approach = st.radio(
+        "Choose how you want to learn the definitions:",
+        ["📐 Right Triangle Approach (SOH-CAH-TOA)", "🌀 Circle Coordinate Approach", "🔄 Both Together"]
+    )
+    
+    if definition_approach in ["📐 Right Triangle Approach (SOH-CAH-TOA)", "🔄 Both Together"]:
+        st.markdown("---")
+        st.subheader("📐 Method 1: Right Triangle Definitions")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown("""
+            #### 📏 In a Right Triangle:
+            
+            **SINE** = **Opposite** ÷ **Hypotenuse**
+            
+            **COSINE** = **Adjacent** ÷ **Hypotenuse**
+            
+            **TANGENT** = **Opposite** ÷ **Adjacent**
+            
+            #### 🎯 Memory Device: SOH-CAH-TOA
+            - **S**ine = **O**pposite / **H**ypotenuse
+            - **C**osine = **A**djacent / **H**ypotenuse  
+            - **T**angent = **O**pposite / **A**djacent
+            """)
+            
+            # Interactive triangle
+            angle_deg = st.slider("Choose angle θ (degrees):", 10, 80, 30, 5, key="triangle_angle")
+            
+            # Calculate triangle sides (using hypotenuse = 10 for simplicity)
+            hypotenuse = 10
+            opposite = hypotenuse * math.sin(math.radians(angle_deg))
+            adjacent = hypotenuse * math.cos(math.radians(angle_deg))
+            
+            # Calculate ratios
+            sine_ratio = opposite / hypotenuse
+            cosine_ratio = adjacent / hypotenuse
+            tangent_ratio = opposite / adjacent
+            
+            st.markdown(f"""
+            #### 📊 For θ = {angle_deg}°:
+            - **Opposite side**: {opposite:.2f}
+            - **Adjacent side**: {adjacent:.2f}  
+            - **Hypotenuse**: {hypotenuse:.2f}
+            
+            #### 🧮 The Ratios:
+            - **sin({angle_deg}°)** = {opposite:.2f} ÷ {hypotenuse:.2f} = **{sine_ratio:.3f}**
+            - **cos({angle_deg}°)** = {adjacent:.2f} ÷ {hypotenuse:.2f} = **{cosine_ratio:.3f}**
+            - **tan({angle_deg}°)** = {opposite:.2f} ÷ {adjacent:.2f} = **{tangent_ratio:.3f}**
+            """)
+        
+        with col2:
+            # Draw the right triangle
+            fig_triangle = go.Figure()
+            
+            # Triangle vertices
+            vertices_x = [0, adjacent, adjacent, 0]
+            vertices_y = [0, 0, opposite, 0]
+            
+            # Draw triangle
+            fig_triangle.add_trace(go.Scatter(
+                x=vertices_x, y=vertices_y, mode='lines+markers',
+                line=dict(color='blue', width=3), marker=dict(size=8),
+                name='Triangle', showlegend=False
+            ))
+            
+            # Label sides
+            fig_triangle.add_annotation(x=adjacent/2, y=-0.5, text=f"Adjacent = {adjacent:.1f}",
+                                      showarrow=False, font=dict(size=12, color='green'))
+            fig_triangle.add_annotation(x=adjacent+0.5, y=opposite/2, text=f"Opposite = {opposite:.1f}",
+                                      showarrow=False, font=dict(size=12, color='red'), textangle=90)
+            fig_triangle.add_annotation(x=adjacent/2-1, y=opposite/2+0.5, text=f"Hypotenuse = {hypotenuse:.1f}",
+                                      showarrow=False, font=dict(size=12, color='blue'), textangle=angle_deg)
+            
+            # Mark the angle
+            angle_arc_x = [1 * math.cos(math.radians(t)) for t in range(0, angle_deg)]
+            angle_arc_y = [1 * math.sin(math.radians(t)) for t in range(0, angle_deg)]
+            fig_triangle.add_trace(go.Scatter(
+                x=angle_arc_x, y=angle_arc_y, mode='lines',
+                line=dict(color='purple', width=2), name='θ', showlegend=False
+            ))
+            fig_triangle.add_annotation(x=1.5, y=0.3, text=f"θ = {angle_deg}°",
+                                      showarrow=False, font=dict(size=14, color='purple'))
+            
+            # Right angle marker
+            fig_triangle.add_trace(go.Scatter(
+                x=[adjacent-1, adjacent-1, adjacent], y=[0, 1, 1], mode='lines',
+                line=dict(color='gray', width=2), showlegend=False
+            ))
+            
+            fig_triangle.update_layout(
+                title=f"Right Triangle: θ = {angle_deg}°",
+                xaxis=dict(range=[-1, max(adjacent+2, 12)], scaleanchor="y", scaleratio=1),
+                yaxis=dict(range=[-2, max(opposite+2, 8)]),
+                height=400, showlegend=False
+            )
+            
+            st.plotly_chart(fig_triangle, use_container_width=True)
+    
+    if definition_approach in ["🌀 Circle Coordinate Approach", "🔄 Both Together"]:
+        st.markdown("---")
+        st.subheader("🌀 Method 2: Circle Coordinate Definitions")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown("""
+            #### 🎯 On ANY Circle (not just unit circle):
+            
+            When you have a circle and draw a line from the center at angle θ:
+            
+            **COSINE** = **x-coordinate** ÷ **radius**
+            
+            **SINE** = **y-coordinate** ÷ **radius**
+            
+            #### 🌟 Special Case: Unit Circle (radius = 1)
+            
+            **COSINE** = **x-coordinate** (exactly!)
+            
+            **SINE** = **y-coordinate** (exactly!)
+            
+            This is why the unit circle is so powerful—no division needed!
+            """)
+            
+            # Interactive circle
+            circle_radius = st.slider("Circle radius:", 1, 10, 5, 1, key="circle_radius")
+            circle_angle = st.slider("Angle θ (degrees):", 0, 360, 45, 15, key="circle_angle")
+            
+            # Calculate coordinates
+            angle_rad = math.radians(circle_angle)
+            x_coord = circle_radius * math.cos(angle_rad)
+            y_coord = circle_radius * math.sin(angle_rad)
+            
+            # Calculate the ratios
+            cosine_from_circle = x_coord / circle_radius
+            sine_from_circle = y_coord / circle_radius
+            
+            st.markdown(f"""
+            #### 📊 For radius = {circle_radius}, θ = {circle_angle}°:
+            - **Point coordinates**: ({x_coord:.2f}, {y_coord:.2f})
+            - **Radius**: {circle_radius}
+            
+            #### 🧮 The Definitions:
+            - **cos({circle_angle}°)** = {x_coord:.2f} ÷ {circle_radius} = **{cosine_from_circle:.3f}**
+            - **sin({circle_angle}°)** = {y_coord:.2f} ÷ {circle_radius} = **{sine_from_circle:.3f}**
+            """)
+            
+            if circle_radius == 1:
+                st.success("🌟 With radius = 1, cos and sin ARE the coordinates!")
+        
+        with col2:
+            # Draw the circle
+            fig_circle = go.Figure()
+            
+            # Circle
+            theta_circle = np.linspace(0, 2*math.pi, 100)
+            circle_x = circle_radius * np.cos(theta_circle)
+            circle_y = circle_radius * np.sin(theta_circle)
+            fig_circle.add_trace(go.Scatter(
+                x=circle_x, y=circle_y, mode='lines',
+                line=dict(color='lightblue', width=3), name='Circle', showlegend=False
+            ))
+            
+            # Axes
+            axis_range = circle_radius + 1
+            fig_circle.add_trace(go.Scatter(
+                x=[-axis_range, axis_range], y=[0, 0], mode='lines',
+                line=dict(color='gray', width=1), showlegend=False
+            ))
+            fig_circle.add_trace(go.Scatter(
+                x=[0, 0], y=[-axis_range, axis_range], mode='lines',
+                line=dict(color='gray', width=1), showlegend=False
+            ))
+            
+            # Radius line to point
+            fig_circle.add_trace(go.Scatter(
+                x=[0, x_coord], y=[0, y_coord], mode='lines+markers',
+                line=dict(color='red', width=3), marker=dict(size=10),
+                name='Radius', showlegend=False
+            ))
+            
+            # Point on circle
+            fig_circle.add_trace(go.Scatter(
+                x=[x_coord], y=[y_coord], mode='markers+text',
+                marker=dict(size=12, color='red'),
+                text=[f'({x_coord:.1f}, {y_coord:.1f})'], textposition="top center",
+                showlegend=False
+            ))
+            
+            # Coordinate lines
+            fig_circle.add_trace(go.Scatter(
+                x=[x_coord, x_coord], y=[0, y_coord], mode='lines',
+                line=dict(color='green', width=2, dash='dash'), 
+                name='y-coordinate', showlegend=False
+            ))
+            fig_circle.add_trace(go.Scatter(
+                x=[0, x_coord], y=[y_coord, y_coord], mode='lines',
+                line=dict(color='blue', width=2, dash='dash'),
+                name='x-coordinate', showlegend=False
+            ))
+            
+            # Labels
+            fig_circle.add_annotation(x=x_coord/2, y=-0.3, text=f"x = {x_coord:.1f}",
+                                    showarrow=False, font=dict(size=12, color='blue'))
+            fig_circle.add_annotation(x=-0.3, y=y_coord/2, text=f"y = {y_coord:.1f}",
+                                    showarrow=False, font=dict(size=12, color='green'))
+            fig_circle.add_annotation(x=1, y=0.5, text=f"θ = {circle_angle}°",
+                                    showarrow=False, font=dict(size=12, color='purple'))
+            
+            fig_circle.update_layout(
+                title=f"Circle Definition: r = {circle_radius}, θ = {circle_angle}°",
+                xaxis=dict(scaleanchor="y", scaleratio=1, range=[-axis_range, axis_range]),
+                yaxis=dict(range=[-axis_range, axis_range]),
+                height=400
+            )
+            
+            st.plotly_chart(fig_circle, use_container_width=True)
+    
+    if definition_approach == "🔄 Both Together":
+        st.markdown("---")
+        st.subheader("🔄 Connecting Both Definitions")
+        
+        st.markdown("""
+        ### 🎯 The Big Picture: They're the SAME Thing!
+        
+        The right triangle and circle definitions are **identical**:
+        
+        - **Right triangle**: sine = opposite ÷ hypotenuse
+        - **Circle**: sine = y-coordinate ÷ radius
+        
+        **Why?** Because the "opposite side" IS the y-coordinate, and the "hypotenuse" IS the radius!
+        
+        The "adjacent side" IS the x-coordinate!
+        """)
+        
+        # Side-by-side comparison
+        compare_angle = st.slider("Compare at angle:", 10, 80, 30, 5, key="compare_angle")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 📐 Triangle View")
+            triangle_hyp = 8
+            triangle_opp = triangle_hyp * math.sin(math.radians(compare_angle))
+            triangle_adj = triangle_hyp * math.cos(math.radians(compare_angle))
+            
+            st.write(f"**Opposite**: {triangle_opp:.2f}")
+            st.write(f"**Adjacent**: {triangle_adj:.2f}")
+            st.write(f"**Hypotenuse**: {triangle_hyp:.2f}")
+            st.write(f"**sin({compare_angle}°)**: {triangle_opp/triangle_hyp:.3f}")
+            st.write(f"**cos({compare_angle}°)**: {triangle_adj/triangle_hyp:.3f}")
+        
+        with col2:
+            st.markdown("#### 🌀 Circle View")
+            circle_r = 8
+            circle_x = circle_r * math.cos(math.radians(compare_angle))
+            circle_y = circle_r * math.sin(math.radians(compare_angle))
+            
+            st.write(f"**x-coordinate**: {circle_x:.2f}")
+            st.write(f"**y-coordinate**: {circle_y:.2f}")
+            st.write(f"**Radius**: {circle_r:.2f}")
+            st.write(f"**sin({compare_angle}°)**: {circle_y/circle_r:.3f}")
+            st.write(f"**cos({compare_angle}°)**: {circle_x/circle_r:.3f}")
+        
+        if abs(triangle_opp - circle_y) < 0.01 and abs(triangle_adj - circle_x) < 0.01:
+            st.success("🎉 See? The opposite = y-coordinate, and adjacent = x-coordinate!")
+    
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    
+    insight_cols = st.columns(3)
+    
+    with insight_cols[0]:
+        st.markdown("""
+        #### 🔢 **Sine & Cosine are RATIOS**
+        - They're always between -1 and 1
+        - They don't depend on the size of the triangle/circle
+        - Only the angle matters!
+        """)
+    
+    with insight_cols[1]:
+        st.markdown("""
+        #### 📍 **Sine & Cosine are COORDINATES**
+        - On the unit circle, they ARE the coordinates
+        - cos = how far right/left
+        - sin = how far up/down
+        """)
+    
+    with insight_cols[2]:
+        st.markdown("""
+        #### 🎯 **They're the SAME concept**
+        - Triangle ratios = coordinate ratios
+        - Ancient builders used both views
+        - Modern math connects them beautifully
+        """)
+    
+    # Quick check understanding
+    st.markdown("---")
+    st.subheader("🧠 Quick Understanding Check")
+    
+    check_questions = [
+        {
+            "question": "If you're at angle 60° on a circle with radius 5, and the point is at (2.5, 4.33), what is cos(60°)?",
+            "options": ["A) 4.33/5 = 0.866", "B) 2.5/5 = 0.5", "C) 4.33/2.5 = 1.732", "D) 5/2.5 = 2"],
+            "correct": "B",
+            "explanation": "cos(60°) = x-coordinate ÷ radius = 2.5 ÷ 5 = 0.5"
+        },
+        {
+            "question": "In a right triangle, if the opposite side is 3 and hypotenuse is 5, what is sin(θ)?",
+            "options": ["A) 3/5 = 0.6", "B) 4/5 = 0.8", "C) 3/4 = 0.75", "D) 5/3 = 1.67"],
+            "correct": "A", 
+            "explanation": "sin(θ) = opposite ÷ hypotenuse = 3 ÷ 5 = 0.6"
+        }
+    ]
+    
+    for i, q in enumerate(check_questions):
+        st.write(f"**Question {i+1}:** {q['question']}")
+        user_choice = st.radio(f"Choose your answer:", q["options"], key=f"check_{i}")
+        
+        if st.button(f"Check Answer {i+1}", key=f"check_btn_{i}"):
+            if user_choice.startswith(q["correct"]):
+                st.success(f"✅ Correct! {q['explanation']}")
+            else:
+                st.error(f"❌ Not quite. {q['explanation']}")
+
+# --- LESSON 4: UNIT CIRCLE EXPLORER ---  
 elif lesson_choice == "🌀 Unit Circle Explorer":
     st.header("🌀 The Unit Circle: Your Trig Command Center")
     
@@ -222,8 +730,8 @@ elif lesson_choice == "🌀 Unit Circle Explorer":
         - **Distance from origin**: {math.sqrt(x**2 + y**2):.3f} (always = 1!)
         """)
 
-# --- LESSON 4: SINE & COSINE FUNCTIONS ---
-elif lesson_choice == "📊 Sine & Cosine Functions":
+# --- LESSON 5: SINE & COSINE AS FUNCTIONS ---
+elif lesson_choice == "📊 Sine & Cosine as Functions":
     st.header("📊 Sine & Cosine: The Wave Functions")
     
     st.markdown("""
@@ -436,7 +944,7 @@ elif lesson_choice == "🔢 The Famous Limit":
         else:
             st.info("Try a smaller angle to see it approach 1!")
 
-# --- LESSON 6: PRACTICE PROBLEMS ---
+# --- LESSON 7: PRACTICE PROBLEMS ---
 elif lesson_choice == "🎯 Practice Problems":
     st.header("🎯 Practice Problems & Quizzes")
     
@@ -579,7 +1087,7 @@ elif lesson_choice == "🎯 Practice Problems":
         if st.button("Show Answer"):
             st.success(f"✅ Answer: {problem['answer']}")
 
-# --- LESSON 7: REAL-WORLD APPLICATIONS ---
+# --- LESSON 8: REAL-WORLD APPLICATIONS ---
 elif lesson_choice == "🌍 Real-World Applications":
     st.header("🌍 Trigonometry in the Real World")
     
@@ -1059,7 +1567,7 @@ elif lesson_choice == "🌍 Real-World Applications":
             - **Planetary exploration**: Navigation
             """)
 
-# --- LESSON 8: QUICK REFERENCE ---
+# --- LESSON 9: QUICK REFERENCE ---
 elif lesson_choice == "🧮 Quick Reference Guide":
     st.header("🧮 Quick Reference Guide")
     
@@ -1317,6 +1825,6 @@ if current_lesson not in st.session_state.student_progress['lessons_completed']:
     st.session_state.student_progress['lessons_completed'].append(current_lesson)
 
 # Progress indicator in sidebar
-progress_percentage = len(st.session_state.student_progress['lessons_completed']) / 8 * 100
+progress_percentage = len(st.session_state.student_progress['lessons_completed']) / 9 * 100
 st.sidebar.markdown(f"### 📊 Your Progress: {progress_percentage:.0f}%")
 st.sidebar.progress(progress_percentage / 100)
